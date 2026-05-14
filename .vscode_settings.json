@@ -1,0 +1,21 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.cmakePath": "D:/Qt/Tools/CMake_64/bin/cmake.exe",
+    "cmake.generator": "MinGW Makefiles",
+    "cmake.configureArgs": [
+        "-DCMAKE_PREFIX_PATH=D:/Qt/6.9.1/mingw_64",
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ],
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "terminal.integrated.env.windows": {
+        "PATH": "D:\\Qt\\6.9.1\\mingw_64\\bin;D:\\Qt\\Tools\\CMake_64\\bin;D:\\MinGW-w64\\mingw64\\bin;${env:PATH}"
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "files.associations": {
+        "*.h": "cpp",
+        "*.cpp": "cpp",
+        "*.qss": "css"
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+}

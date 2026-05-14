@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QList>
 #include <QVector>
+#include <QJsonObject>
 #include <memory>
 
 struct Paragraph {
@@ -97,7 +98,7 @@ private:
     QList<Chapter> m_chapters;
     QList<Character> m_characters;
     std::shared_ptr<OutlineNode> m_outlineRoot;
-    bool m_modified = false;
+    bool m_dirty = false;
 };
 
 using DocumentPtr = std::shared_ptr<Document>;

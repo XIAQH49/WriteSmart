@@ -1,0 +1,9 @@
+[
+    {
+        "name": "MinGW 14.2.0 (Qt 6.9.1)",
+        "compilers": {
+            "C": "D:/MinGW-w64/mingw64/bin/gcc.exe",
+            "CXX": "D:/MinGW-w64/mingw64/bin/g++.exe"
+        }
+    }
+]
