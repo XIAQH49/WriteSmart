@@ -1,0 +1,119 @@
+/* WriteSmart 2.0 默认样式表 */
+
+QMainWindow {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+QSplitter::handle {
+    background-color: #313244;
+    width: 3px;
+}
+
+QSplitter::handle:hover {
+    background-color: #89b4fa;
+}
+
+/* 左侧边栏 */
+QTreeView {
+    background-color: #181825;
+    color: #cdd6f4;
+    border: none;
+    font-size: 13px;
+}
+
+QTreeView::item:selected {
+    background-color: #45475a;
+    color: #cdd6f4;
+}
+
+QTreeView::item:hover {
+    background-color: #313244;
+}
+
+QTabWidget::pane {
+    border: none;
+    background-color: #181825;
+}
+
+QTabBar::tab {
+    background-color: #1e1e2e;
+    color: #6c7086;
+    padding: 6px 12px;
+    border: none;
+}
+
+QTabBar::tab:selected {
+    color: #89b4fa;
+    border-bottom: 2px solid #89b4fa;
+}
+
+/* 中间编辑区 */
+QPlainTextEdit {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: none;
+    font-size: 15px;
+    font-family: "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    selection-background-color: #45475a;
+    padding: 20px;
+}
+
+/* 右侧对话栏 */
+QScrollArea {
+    background-color: #181825;
+    border: none;
+}
+
+QTextEdit {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+}
+
+QPushButton {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #b4befe;
+}
+
+QPushButton:pressed {
+    background-color: #74c7ec;
+}
+
+/* 状态栏 */
+QStatusBar {
+    background-color: #11111b;
+    color: #6c7086;
+    font-size: 12px;
+}
+
+/* 菜单栏 */
+QMenuBar {
+    background-color: #11111b;
+    color: #cdd6f4;
+}
+
+QMenuBar::item:selected {
+    background-color: #313244;
+}
+
+QMenu {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+}
+
+QMenu::item:selected {
+    background-color: #45475a;
+}
