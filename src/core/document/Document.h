@@ -80,6 +80,7 @@ public:
     int chapterCount() const;
 
     // 序列化
+    QJsonObject toJson() const;
     bool save(const QString& filePath = QString());
     bool load(const QString& filePath);
     QString toMarkdown() const;
@@ -90,6 +91,7 @@ public:
     void markClean();
 
 private:
+    QString m_fileId;
     QString m_filePath;
     QString m_title;
     QString m_author;

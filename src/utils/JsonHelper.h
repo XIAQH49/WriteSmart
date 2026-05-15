@@ -3,7 +3,6 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QJsonDocument>
 #include <QString>
 
 class JsonHelper {

@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonObject>
+#include <QTimer>
 #include <functional>
 
 class HttpClient : public QObject {
@@ -28,18 +29,31 @@ public:
     void get(const QString& path, ResponseCallback callback);
     void cancelAll();
 
+    static HttpClient* make();  // 工厂：返回 self-deleting 实例
+
 private slots:
     void onReadyRead();
     void onFinished();
+    void onTimeout();
 
 private:
     QNetworkRequest buildRequest(const QString& path) const;
+    void finishReply(QNetworkReply* reply, ResponseCallback callback);
+
     QNetworkAccessManager* m_manager = nullptr;
     QString m_baseUrl;
     QString m_apiKey;
     QJsonObject m_customHeaders;
     int m_timeoutSecs = 30;
-    QList<QNetworkReply*> m_activeReplies;
+
+    struct ActiveRequest {
+        QNetworkReply* reply = nullptr;
+        qint64 bytesRead = 0;
+        StreamCallback onChunk;
+        ResponseCallback onDone;
+        QTimer* timer = nullptr;
+    };
+    QList<ActiveRequest> m_activeRequests;
 };
 
-#endif // WRITESMART_HTTP_CLIENT_H
+#endif

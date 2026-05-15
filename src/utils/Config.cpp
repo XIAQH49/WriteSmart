@@ -1,4 +1,4 @@
-#include "app/Config.h"
+#include "utils/Config.h"
 #include "utils/JsonHelper.h"
 #include <QFile>
 

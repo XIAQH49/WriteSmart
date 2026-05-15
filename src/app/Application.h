@@ -15,7 +15,10 @@ public:
     void shutdown();
 
 private:
+    void restoreSession();
+    void saveSession();
+
     std::unique_ptr<MainWindow> m_mainWindow;
 };
 
-#endif // WRITESMART_APPLICATION_H
+#endif

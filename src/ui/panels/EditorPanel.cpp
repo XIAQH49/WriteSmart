@@ -1,6 +1,6 @@
 #include "ui/panels/EditorPanel.h"
 #include "core/document/Document.h"
-#include "app/Config.h"
+#include "utils/Config.h"
 #include "utils/StringUtils.h"
 #include <QVBoxLayout>
 #include <QLabel>

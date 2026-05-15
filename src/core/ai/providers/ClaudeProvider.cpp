@@ -1,11 +1,10 @@
 #include "core/ai/providers/ClaudeProvider.h"
 #include "network/HttpClient.h"
 #include "network/StreamHandler.h"
+#include <QJsonDocument>
+#include <QObject>
 
-ClaudeProvider::ClaudeProvider()
-{
-    m_network = new QNetworkAccessManager();
-}
+ClaudeProvider::ClaudeProvider() {}
 
 QString ClaudeProvider::providerId() const { return "claude"; }
 QString ClaudeProvider::providerName() const { return "Anthropic Claude"; }
@@ -30,64 +29,62 @@ bool ClaudeProvider::configure(const QJsonObject& config)
 
 QJsonObject ClaudeProvider::configuration() const
 {
-    QJsonObject obj;
-    obj["apiKey"] = m_apiKey;
-    obj["baseUrl"] = m_baseUrl;
-    obj["model"] = m_model;
-    obj["temperature"] = m_temperature;
-    obj["maxTokens"] = m_maxTokens;
-    return obj;
+    return {
+        {"apiKey", m_apiKey},
+        {"baseUrl", m_baseUrl},
+        {"model", m_model},
+        {"temperature", m_temperature},
+        {"maxTokens", m_maxTokens}
+    };
 }
 
 QJsonObject ClaudeProvider::buildRequestBody(const ChatRequest& request) const
 {
-    QJsonObject body;
-    body["model"] = request.model.isEmpty() ? m_model : request.model;
-    body["max_tokens"] = request.maxTokens;
-
     QJsonArray messages;
     for (const auto& msg : request.messages) {
-        QJsonObject m;
-        m["role"] = msg.role;
-        m["content"] = msg.content;
-        messages.append(m);
+        messages.append(QJsonObject{{"role", msg.role}, {"content", msg.content}});
     }
-    body["messages"] = messages;
-    return body;
+
+    return {
+        {"model", request.model.isEmpty() ? m_model : request.model},
+        {"max_tokens", request.maxTokens},
+        {"messages", messages}
+    };
 }
 
 void ClaudeProvider::chat(const ChatRequest& request, ChatCallback callback)
 {
-    auto* client = new HttpClient();
+    auto* client = HttpClient::make();
     client->setBaseUrl(m_baseUrl);
-    client->setApiKey(m_apiKey);
     QJsonObject headers;
     headers["x-api-key"] = m_apiKey;
     headers["anthropic-version"] = "2023-06-01";
     client->setHeaders(headers);
 
-    QJsonObject body = buildRequestBody(request);
-    client->post("/v1/messages", body,
+    client->post("/v1/messages", buildRequestBody(request),
         [callback](int, const QByteArray& data, const QString& error) {
             if (!error.isEmpty()) {
                 callback(false, {}, error);
                 return;
             }
-            ChatResponse resp;
             QJsonObject obj = QJsonDocument::fromJson(data).object();
-            if (obj.contains("content") && !obj["content"].toArray().isEmpty()) {
+            ChatResponse resp;
+            if (!obj["content"].toArray().isEmpty()) {
                 resp.content = obj["content"].toArray()[0].toObject()["text"].toString();
                 resp.model = obj["model"].toString();
             }
+            auto usage = obj["usage"].toObject();
+            resp.promptTokens = usage["input_tokens"].toInt();
+            resp.completionTokens = usage["output_tokens"].toInt();
+            resp.finishReason = obj["stop_reason"].toString();
             callback(true, resp, {});
         });
 }
 
 void ClaudeProvider::chatStream(const ChatRequest& request, StreamCallback callback)
 {
-    auto* client = new HttpClient();
+    auto* client = HttpClient::make();
     client->setBaseUrl(m_baseUrl);
-    client->setApiKey(m_apiKey);
     QJsonObject headers;
     headers["x-api-key"] = m_apiKey;
     headers["anthropic-version"] = "2023-06-01";
@@ -96,18 +93,19 @@ void ClaudeProvider::chatStream(const ChatRequest& request, StreamCallback callb
     QJsonObject body = buildRequestBody(request);
     body["stream"] = true;
 
-    auto* handler = new StreamHandler();
+    auto* handler = new StreamHandler(client);
     handler->setContentPath("delta.text");
     handler->setTokenCallback([callback](const QString& token) {
         callback(token, false, {});
+    });
+    QObject::connect(handler, &StreamHandler::streamFinished, handler, [callback, handler]() {
+        callback({}, true, {});
     });
 
     client->postStream("/v1/messages", body,
         [handler](const QByteArray& chunk) { handler->feed(chunk); },
         [callback, handler](int, const QByteArray&, const QString& error) {
             if (!error.isEmpty()) callback({}, true, error);
-            else callback({}, true, {});
-            handler->deleteLater();
         });
 }
 

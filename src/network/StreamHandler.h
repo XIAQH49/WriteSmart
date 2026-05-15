@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QJsonObject>
 #include <functional>
 
 class StreamHandler : public QObject {
@@ -24,12 +25,16 @@ public:
     bool isComplete() const;
     QString finishReason() const;
 
+signals:
+    void tokenReceived(const QString& token);
+    void streamFinished();
+
 private:
     void parseBuffer();
     QString extractContent(const QJsonObject& obj) const;
 
     QString m_contentPath = "choices[0].delta.content";
-    QString m_buffer;
+    QByteArray m_buffer;
     QString m_finishReason;
     bool m_complete = false;
 
@@ -37,4 +42,4 @@ private:
     ErrorCallback m_errorCallback;
 };
 
-#endif // WRITESMART_STREAM_HANDLER_H
+#endif

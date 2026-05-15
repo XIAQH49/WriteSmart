@@ -2,7 +2,6 @@
 #define WRITESMART_CLAUDE_PROVIDER_H
 
 #include "core/ai/AIProvider.h"
-#include <QNetworkAccessManager>
 
 class ClaudeProvider : public AIProvider {
 public:
@@ -27,8 +26,7 @@ private:
     QString m_model = "claude-3-5-sonnet-20241022";
     double m_temperature = 0.7;
     int m_maxTokens = 4096;
-    QNetworkAccessManager* m_network = nullptr;
     bool m_configured = false;
 };
 
-#endif // WRITESMART_CLAUDE_PROVIDER_H
+#endif

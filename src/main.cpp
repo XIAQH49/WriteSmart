@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QDir>
-#include "app/Config.h"
+#include "utils/Config.h"
 #include "app/Application.h"
 
 int main(int argc, char* argv[])

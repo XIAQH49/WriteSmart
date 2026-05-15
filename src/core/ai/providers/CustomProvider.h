@@ -3,7 +3,6 @@
 
 #include "core/ai/AIProvider.h"
 #include "network/ApiConfig.h"
-#include <QNetworkAccessManager>
 
 class CustomProvider : public AIProvider {
 public:
@@ -24,8 +23,7 @@ public:
 private:
     QJsonObject buildRequestBody(const ChatRequest& request) const;
     ApiEndpoint m_endpoint;
-    QNetworkAccessManager* m_network = nullptr;
     bool m_configured = false;
 };
 
-#endif // WRITESMART_CUSTOM_PROVIDER_H
+#endif
