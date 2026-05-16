@@ -6,6 +6,8 @@
 #include <QTabWidget>
 #include <QStandardItemModel>
 #include <QPushButton>
+#include <QLabel>
+#include <QVBoxLayout>
 #include <memory>
 
 class Document;
@@ -29,10 +31,13 @@ private:
     void setupConnections();
     void refreshOutline();
     void refreshCharacters();
+    void refreshSettings();
     void onAddChapter();
     void onRemoveChapter();
     void onAddCharacter();
     void onRemoveCharacter();
+    void onAddSetting();
+    void onRemoveSetting();
 
     QTabWidget* m_tabWidget = nullptr;
 
@@ -46,7 +51,10 @@ private:
     QPushButton* m_addCharBtn = nullptr;
     QPushButton* m_removeCharBtn = nullptr;
 
-    QWidget* m_settingsTab = nullptr;
+    QTreeView* m_settingsTree = nullptr;
+    QStandardItemModel* m_settingsModel = nullptr;
+    QPushButton* m_addSettingBtn = nullptr;
+    QPushButton* m_removeSettingBtn = nullptr;
 
     std::shared_ptr<Document> m_document;
 };

@@ -81,25 +81,32 @@ void SidebarPanel::setupUI()
     m_tabWidget->addTab(charTab, "人物");
 
     // ========================
-    // 设定 Tab
+    // 设定 Tab（独立 Model，不污染人物）
     // ========================
-    m_settingsTab = new QWidget(this);
-    auto* settingsLayout = new QVBoxLayout(m_settingsTab);
+    QWidget* settingsTab = new QWidget(this);
+    auto* settingsLayout = new QVBoxLayout(settingsTab);
     settingsLayout->setContentsMargins(4, 4, 4, 4);
-    auto* addSettingBtn = new QPushButton("+ 新建设定条目", m_settingsTab);
-    addSettingBtn->setFixedHeight(28);
-    connect(addSettingBtn, &QPushButton::clicked, this, [this]() {
-        bool ok;
-        QString key = QInputDialog::getText(this, "新建设定", "条目名称:", QLineEdit::Normal, "", &ok);
-        if (ok && !key.isEmpty()) {
-            auto* item = new QStandardItem(key);
-            item->setEditable(true);
-            m_characterModel->appendRow(item);
-        }
-    });
-    settingsLayout->addWidget(addSettingBtn);
-    settingsLayout->addStretch();
-    m_tabWidget->addTab(m_settingsTab, "设定");
+
+    m_settingsModel = new QStandardItemModel(this);
+    m_settingsTree = new QTreeView(this);
+    m_settingsTree->setModel(m_settingsModel);
+    m_settingsTree->setHeaderHidden(true);
+    m_settingsTree->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_settingsTree->setRootIsDecorated(false);
+    settingsLayout->addWidget(m_settingsTree, 1);
+
+    auto* settingsBtnLayout = new QHBoxLayout();
+    m_addSettingBtn = new QPushButton("+ 条目", this);
+    m_addSettingBtn->setFixedHeight(24);
+    m_addSettingBtn->setToolTip("新建设定条目（世界观、道具等）");
+    m_removeSettingBtn = new QPushButton("- 条目", this);
+    m_removeSettingBtn->setFixedHeight(24);
+    m_removeSettingBtn->setToolTip("删除选中的设定条目");
+    settingsBtnLayout->addWidget(m_addSettingBtn);
+    settingsBtnLayout->addWidget(m_removeSettingBtn);
+    settingsLayout->addLayout(settingsBtnLayout);
+
+    m_tabWidget->addTab(settingsTab, "设定");
 
     layout->addWidget(m_tabWidget);
 }
@@ -122,6 +129,8 @@ void SidebarPanel::setupConnections()
     connect(m_removeChapterBtn, &QPushButton::clicked, this, &SidebarPanel::onRemoveChapter);
     connect(m_addCharBtn, &QPushButton::clicked, this, &SidebarPanel::onAddCharacter);
     connect(m_removeCharBtn, &QPushButton::clicked, this, &SidebarPanel::onRemoveCharacter);
+    connect(m_addSettingBtn, &QPushButton::clicked, this, &SidebarPanel::onAddSetting);
+    connect(m_removeSettingBtn, &QPushButton::clicked, this, &SidebarPanel::onRemoveSetting);
 }
 
 void SidebarPanel::setDocument(std::shared_ptr<Document> doc)
@@ -141,7 +150,6 @@ void SidebarPanel::refreshOutline()
     m_outlineModel->clear();
     if (!m_document) return;
 
-    // 首先展示所有章节
     for (const auto& ch : m_document->chapters()) {
         auto* item = new QStandardItem(ch.title.isEmpty() ? "(无标题)" : ch.title);
         item->setData(ch.id, Qt::UserRole);
@@ -150,25 +158,21 @@ void SidebarPanel::refreshOutline()
         m_outlineModel->appendRow(item);
     }
 
-    // 也展示大纲树
     if (m_document->outlineRoot()) {
         std::function<void(std::shared_ptr<OutlineNode>, QStandardItem*)> addNode =
             [&](std::shared_ptr<OutlineNode> node, QStandardItem* parent) {
+                if (node->title.isEmpty() && node->children.isEmpty()) return;
                 auto* item = new QStandardItem(node->title.isEmpty() ? "..." : node->title);
                 item->setData(node->id, Qt::UserRole);
+                item->setData(node->linkedChapterId, Qt::UserRole + 1);
                 item->setEditable(false);
-                if (!node->linkedChapterId.isEmpty()) {
-                    item->setData(node->linkedChapterId, Qt::UserRole);
-                }
                 if (parent) parent->appendRow(item);
                 else m_outlineModel->appendRow(item);
                 for (auto& child : node->children) addNode(child, item);
             };
 
-        bool firstRootChild = true;
         for (auto& child : m_document->outlineRoot()->children) {
-            addNode(child, firstRootChild ? nullptr : m_outlineModel->invisibleRootItem());
-            firstRootChild = false;
+            addNode(child, nullptr);
         }
     }
 
@@ -249,4 +253,29 @@ void SidebarPanel::onRemoveCharacter()
     chars.erase(std::remove_if(chars.begin(), chars.end(),
         [&](const Character& c) { return c.id == charId; }), chars.end());
     refreshCharacters();
+}
+
+void SidebarPanel::onAddSetting()
+{
+    bool ok;
+    QString key = QInputDialog::getText(this, "新建设定", "条目名称:", QLineEdit::Normal, "", &ok);
+    if (!ok || key.isEmpty()) return;
+
+    auto* item = new QStandardItem(key);
+    item->setEditable(true);
+    item->setData(StringUtils::generateId("setting"), Qt::UserRole);
+    m_settingsModel->appendRow(item);
+}
+
+void SidebarPanel::onRemoveSetting()
+{
+    QModelIndex idx = m_settingsTree->currentIndex();
+    if (!idx.isValid()) return;
+
+    auto r = QMessageBox::question(this, "删除设定条目",
+        "确定要删除 \"" + m_settingsModel->itemFromIndex(idx)->text() + "\" 吗？",
+        QMessageBox::Yes | QMessageBox::No);
+    if (r == QMessageBox::Yes) {
+        m_settingsModel->removeRow(idx.row());
+    }
 }

@@ -5,6 +5,7 @@
 #include "core/document/Document.h"
 #include "core/document/DocumentManager.h"
 #include "utils/Config.h"
+#include "utils/StringUtils.h"
 #include "ui/themes/ThemeManager.h"
 #include <QMenuBar>
 #include <QStatusBar>
@@ -143,6 +144,12 @@ void MainWindow::onNewDocument()
 
     auto doc = std::make_shared<Document>();
     doc->setTitle("未命名文档");
+
+    Chapter defaultChapter;
+    defaultChapter.id = StringUtils::generateId("ch");
+    defaultChapter.title = "第一章";
+    doc->addChapter(defaultChapter);
+
     m_docManager->setCurrentDocument(doc);
     m_sidebar->setDocument(doc);
     m_editor->setDocument(doc);
