@@ -2,8 +2,12 @@
 #include "ui/panels/SidebarPanel.h"
 #include "ui/panels/EditorPanel.h"
 #include "ui/panels/ChatPanel.h"
+#include "ui/panels/SettingsDialog.h"
 #include "core/document/Document.h"
 #include "core/document/DocumentManager.h"
+#include "core/ai/providers/OpenAIProvider.h"
+#include "core/ai/providers/ClaudeProvider.h"
+#include "core/ai/providers/CustomProvider.h"
 #include "utils/Config.h"
 #include "utils/StringUtils.h"
 #include "ui/themes/ThemeManager.h"
@@ -28,6 +32,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     setWindowTitle("WriteSmart 2.0");
     resize(1400, 900);
+
+    applyAIConfig();
 }
 
 MainWindow::~MainWindow() = default;
@@ -98,6 +104,11 @@ void MainWindow::setupMenuBar()
             "自定义 AI API\n"
             "C++ / Qt 6.9");
     });
+
+    QMenu* settingsMenu = menuBar()->addMenu("设置(&S)");
+    QAction* aiSettingsAction = settingsMenu->addAction("AI API 设置(&A)...");
+    aiSettingsAction->setShortcut(QKeySequence("Ctrl+,"));
+    connect(aiSettingsAction, &QAction::triggered, this, &MainWindow::onOpenSettings);
 }
 
 void MainWindow::setupStatusBar()
@@ -258,4 +269,39 @@ void MainWindow::updateDocumentTitle()
         if (doc->isModified()) title = "* " + title;
     }
     setWindowTitle(title);
+}
+
+void MainWindow::onOpenSettings()
+{
+    auto* dlg = new SettingsDialog(this);
+    dlg->setAiConfig(Config::instance().aiConfig());
+
+    connect(dlg, &SettingsDialog::configChanged, this, [this](const QJsonObject& config) {
+        Config::instance().setAiConfig(config);
+        applyAIConfig();
+    });
+
+    dlg->exec();
+    dlg->deleteLater();
+}
+
+void MainWindow::applyAIConfig()
+{
+    QJsonObject cfg = Config::instance().aiConfig();
+    if (cfg.isEmpty()) return;
+
+    QString provider = cfg["provider"].toString();
+    AIProviderPtr ai;
+
+    if (provider == "claude") {
+        ai = std::make_shared<ClaudeProvider>();
+    } else if (provider == "custom") {
+        ai = std::make_shared<CustomProvider>();
+    } else {
+        ai = std::make_shared<OpenAIProvider>();
+    }
+
+    if (ai->configure(cfg)) {
+        m_chatPanel->setAIProvider(ai);
+    }
 }

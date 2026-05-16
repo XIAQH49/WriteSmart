@@ -20,6 +20,7 @@ public:
 
     void openDocument(const QString& filePath);
     void saveDocumentIfNeeded();
+    void applyAIConfig();
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -31,6 +32,7 @@ private slots:
     void onDocumentChanged();
     void onWordCountChanged(int count);
     void onAIRequested(const QString& prompt, const QString& context);
+    void onOpenSettings();
 
 private:
     void setupUI();

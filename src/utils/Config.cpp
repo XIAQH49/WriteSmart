@@ -37,6 +37,10 @@ bool Config::load(const QString& path)
     m_autoSaveIntervalMs = JsonHelper::safeGetInt(obj, "autoSaveIntervalMs", 2000);
     m_lastDocumentPath = JsonHelper::safeGetString(obj, "lastDocumentPath");
 
+    if (obj.contains("ai")) {
+        m_aiConfig = obj["ai"].toObject();
+    }
+
     if (obj.contains("recentDocuments")) {
         for (const auto& v : obj["recentDocuments"].toArray()) {
             m_recentDocuments.append(v.toString());
@@ -85,6 +89,9 @@ void Config::addRecentDocument(const QString& path)
     }
 }
 
+QJsonObject Config::aiConfig() const { return m_aiConfig; }
+void Config::setAiConfig(const QJsonObject& config) { m_aiConfig = config; }
+
 QJsonObject Config::toJson() const
 {
     QJsonObject obj;
@@ -110,6 +117,10 @@ QJsonObject Config::toJson() const
     QJsonArray recent;
     for (const auto& d : m_recentDocuments) recent.append(d);
     obj["recentDocuments"] = recent;
+
+    if (!m_aiConfig.isEmpty()) {
+        obj["ai"] = m_aiConfig;
+    }
 
     return obj;
 }

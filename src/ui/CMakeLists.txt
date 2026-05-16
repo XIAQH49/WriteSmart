@@ -7,6 +7,8 @@ add_library(ws_ui STATIC
     panels/EditorPanel.h
     panels/ChatPanel.cpp
     panels/ChatPanel.h
+    panels/SettingsDialog.cpp
+    panels/SettingsDialog.h
     widgets/ChatBubble.cpp
     widgets/ChatBubble.h
     widgets/MarkdownEditor.cpp

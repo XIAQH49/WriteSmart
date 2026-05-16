@@ -50,6 +50,9 @@ public:
     QStringList recentDocuments() const;
     void addRecentDocument(const QString& path);
 
+    QJsonObject aiConfig() const;
+    void setAiConfig(const QJsonObject& config);
+
     QJsonObject toJson() const;
 
 private:
@@ -64,6 +67,7 @@ private:
     int m_autoSaveIntervalMs = 2000;
     QString m_lastDocumentPath;
     QStringList m_recentDocuments;
+    QJsonObject m_aiConfig;
 };
 
 #endif // WRITESMART_CONFIG_H
