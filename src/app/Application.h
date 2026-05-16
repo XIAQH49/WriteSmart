@@ -2,6 +2,7 @@
 #define WRITESMART_APPLICATION_H
 
 #include <memory>
+#include <QString>
 
 class MainWindow;
 
@@ -13,9 +14,9 @@ public:
     bool initialize();
     void run();
     void shutdown();
+    void restoreSession(const QString& filePath = QString());
 
 private:
-    void restoreSession();
     void saveSession();
 
     std::unique_ptr<MainWindow> m_mainWindow;

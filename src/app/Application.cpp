@@ -1,8 +1,5 @@
 #include "app/Application.h"
 #include "ui/MainWindow.h"
-#include "core/ai/providers/OpenAIProvider.h"
-#include "core/ai/providers/ClaudeProvider.h"
-#include "core/ai/providers/CustomProvider.h"
 #include "core/plugin/PluginManager.h"
 #include "utils/Logger.h"
 #include "utils/Config.h"
@@ -20,16 +17,11 @@ bool Application::initialize()
 {
     Logger::info("WriteSmart 2.0 initializing...");
 
-    // 扫描插件目录
     QString pluginDir = QDir(QApplication::applicationDirPath()).filePath("plugins");
     PluginManager::instance().scanPlugins(pluginDir);
     Logger::info(QString("Loaded %1 plugins").arg(PluginManager::instance().loadedPlugins().size()));
 
-    // 恢复上次文档
     m_mainWindow = std::make_unique<MainWindow>();
-    m_mainWindow->show();
-
-    restoreSession();
 
     Logger::info("Application initialized successfully");
     return true;
@@ -48,8 +40,15 @@ void Application::shutdown()
     m_mainWindow.reset();
 }
 
-void Application::restoreSession()
+void Application::restoreSession(const QString& filePath)
 {
+    if (!m_mainWindow) return;
+
+    if (!filePath.isEmpty()) {
+        m_mainWindow->openDocument(filePath);
+        return;
+    }
+
     const QString& lastPath = Config::instance().lastDocumentPath();
     if (!lastPath.isEmpty()) {
         m_mainWindow->openDocument(lastPath);

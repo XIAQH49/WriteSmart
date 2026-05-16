@@ -20,7 +20,11 @@ public:
     void navigateToChapter(const QString& chapterId);
 
     QString selectedText() const;
+    QString fullText() const;
     int currentWordCount() const;
+    void syncEditsToDocument();
+
+    void scrollToLine(int lineNumber);
 
 signals:
     void wordCountChanged(int count);
@@ -36,13 +40,17 @@ private:
     void setupUI();
     void setupConnections();
     void updateWordCount();
+    void syncDocumentToEditor();
+    int findChapterLine(const QString& chapterId) const;
     QString currentChapterId() const;
+    void buildEditorTextFromDocument();
 
     QPlainTextEdit* m_editor = nullptr;
     QTimer* m_autoSaveTimer = nullptr;
 
     std::shared_ptr<Document> m_document;
     QString m_currentChapterId;
+    int m_lastSavedRevision = 0;
 };
 
-#endif // WRITESMART_EDITOR_PANEL_H
+#endif

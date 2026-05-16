@@ -173,6 +173,9 @@ void MainWindow::onSaveDocument()
 {
     if (!m_docManager->currentDocument()) return;
 
+    // 先将编辑器内容写回文档模型
+    m_editor->syncEditsToDocument();
+
     QString path = m_docManager->currentDocument()->filePath();
     if (path.isEmpty()) {
         path = QFileDialog::getSaveFileName(this, "保存文档", "未命名.wrs",
